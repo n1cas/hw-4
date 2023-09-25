@@ -6,7 +6,7 @@ import { parseRequestData, sendJsonResponse } from "../utils";
 export function createUser(req: IncomingMessage, res: ServerResponse) {
   parseRequestData(req, (data) => {
     const user = JSON.parse(data);
-    user.id = users.length;
+    user.id = users.length + 1;
     users.push(user);
     sendJsonResponse(res, 201, user);
   });

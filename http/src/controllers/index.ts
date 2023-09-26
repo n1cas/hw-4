@@ -1,2 +1,2 @@
-export * from './users.controller'
-export * from './hobbies.controller'
+export {UserController} from './users.controller'
+export {HobbiesController} from './hobbies.controller'

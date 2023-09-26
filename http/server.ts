@@ -1,5 +1,9 @@
 import { hobbyRoutes, userRoutes } from './src/routes';
 import * as http from 'http';
+import { sendJsonResponse } from './src/utils';
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 
 const server = http.createServer((req, res)  => {
   if (req.url?.startsWith('/users')) {
@@ -8,11 +12,12 @@ const server = http.createServer((req, res)  => {
     hobbyRoutes(req, res);
   } else {
     res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ message: 'Not Found' }));
+    sendJsonResponse(res, 404, { message: 'User not found' })
   }
 });
 
-const PORT = 3000;
+const PORT= process.env.port || 3000;
 server.listen(PORT, () => {
+  
   console.log(`Server is running on port ${PORT}`);
 });

@@ -1,25 +1,26 @@
 import { IncomingMessage, ServerResponse } from "http";
-import { createUser, deleteUser, getAllUsers, getUserById, updateUser } from "../controllers";
+import { UserController } from "../controllers";
 
 export function userRoutes(req: IncomingMessage, res: ServerResponse) {
   if (req.method === 'GET') {
     if (req.url === '/users') {
-      getAllUsers(req, res);
+      UserController.getAllUsers(req, res);
       return;
     }
-    getUserById(req, res);
+    
+    UserController.getUserById(req, res);
     return;
   }
 
   if (req.method === 'POST') {
-    createUser(req, res);
+    UserController.createUser(req, res);
     return;
   }
 
   if (req.method === 'DELETE') {
-    deleteUser(req, res)
+    UserController.deleteUser(req, res)
 
   } else if (req.method === 'PATCH') {
-    updateUser(req, res)
+    UserController.updateUser(req, res)
   }
 }

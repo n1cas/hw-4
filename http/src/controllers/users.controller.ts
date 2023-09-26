@@ -1,57 +1,60 @@
+import { DataRepository } from './../database/dataRepository';
 import { IncomingMessage, ServerResponse } from "http";
-import { users } from "../database";
 import { User } from "../interfaces";
 import { parseRequestData, sendJsonResponse } from "../utils";
 
-export function createUser(req: IncomingMessage, res: ServerResponse) {
-  parseRequestData(req, (data) => {
-    const user = JSON.parse(data);
-    user.id = users.length + 1;
-    users.push(user);
-    sendJsonResponse(res, 201, user);
-  });
-}
-
-export function getAllUsers(req: IncomingMessage, res: ServerResponse) {
-  const responseUsers = users.map(({name, id, email}: User )=> {
-    return {name, id, email}
-  })
-  sendJsonResponse(res, 200, responseUsers);
-}
-
-export function getUserById(req: IncomingMessage, res: ServerResponse) {
-  const userId = req.url.split('/')[2];
-  const user = users.find((user) => user.id.toString() === userId);
-  if (user) {
-    const {name, id, email} =  user
-
-    sendJsonResponse(res, 200, {name, id, email});
-  } else {
-    sendJsonResponse(res, 404, { message: 'User not found' });
-  }
-}
-
-export function deleteUser(req: IncomingMessage, res: ServerResponse) {
-  const userId = req.url.split('/')[2];
-  const index = users.findIndex((user) => user.id.toString() === userId);
-  if (index !== -1) {
-    const deletedUser = users.splice(index, 1)[0];
-    sendJsonResponse(res, 200, deletedUser);
-  } else {
-    sendJsonResponse(res, 404, { message: 'User not found' });
-  }
-}
-
-export function updateUser(req: IncomingMessage, res: ServerResponse) {
-  const userId = req.url.split('/')[2];
-  const index = users.findIndex((user) => user.id.toString() === userId);
-  if (index !== -1) {
+export class UserController {
+  static createUser(req: IncomingMessage, res: ServerResponse) {
     parseRequestData(req, (data) => {
-      const updatedUser = JSON.parse(data);
-      users[index] = { ...users[index], ...updatedUser };
-      sendJsonResponse(res, 200, users[index]);
+      const user = JSON.parse(data);
+      user.id = DataRepository.usersLength() + 1;
+      DataRepository.addUser(user);
+      sendJsonResponse(res, 201, user);
     });
-  } else {
-    sendJsonResponse(res, 404, { message: 'User not found' });
+  }
+
+  static getAllUsers(req: IncomingMessage, res: ServerResponse) {
+    const responseUsers = DataRepository.getUsers().map(({ name, id, email }: User) => {
+      return { name, id, email }
+    })
+    sendJsonResponse(res, 200, responseUsers);
+  }
+
+  static getUserById(req: IncomingMessage, res: ServerResponse) {
+    const userId = req.url.split('/')[2];
+    const user = DataRepository.getUserById(userId);
+
+    if (user) {
+      const { name, id, email } = user
+
+      sendJsonResponse(res, 200, { name, id, email });
+    } else {
+      sendJsonResponse(res, 404, { message: 'User not found' });
+    }
+  }
+
+  static deleteUser(req: IncomingMessage, res: ServerResponse) {
+    const userId = req.url.split('/')[2];
+    const deletedUser = DataRepository.deleteUser(userId);
+    
+    if (deletedUser) {
+      sendJsonResponse(res, 200, deletedUser);
+    } else {
+      sendJsonResponse(res, 404, { message: 'User not found' });
+    }
+  }
+
+  static updateUser(req: IncomingMessage, res: ServerResponse) {
+    const userId = req.url.split('/')[2];
+    const user = DataRepository.getUserById(userId);
+    if (user) {
+      parseRequestData(req, (data) => {
+        const updatedUser = DataRepository.updateUser(userId, JSON.parse(data));
+
+        sendJsonResponse(res, 200, updatedUser);
+      });
+    } else {
+      sendJsonResponse(res, 404, { message: 'User not found' });
+    }
   }
 }

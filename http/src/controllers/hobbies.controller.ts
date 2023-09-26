@@ -1,28 +1,39 @@
+import { DataRepository } from "../database";
 import { parseRequestData, sendJsonResponse } from "../utils";
-import { users } from "./../database";
 import { IncomingMessage, ServerResponse } from 'http';
 
-export function getUserHobbies(req: IncomingMessage, res: ServerResponse) {
-  const userId = req.url?.split('/')[2];
-  const hobbies =  userId ? users[userId].hobbies : [];
-  sendJsonResponse(res, 200, hobbies);
-}
+export class HobbiesController {
+  static getUserHobbies(req: IncomingMessage, res: ServerResponse) {
+    const userId = req.url?.split('/')[2];
 
-export function addHobbyForUser(req: IncomingMessage, res: ServerResponse) {
-  const userId = req.url.split('/')[2];
-  parseRequestData(req, (data) => {
-    const hobby = JSON.parse(data);
-    if (!users[userId]) {
+    sendJsonResponse(res, 200, DataRepository.getUserHobbies(userId));
+  }
+
+  static addUserHobby(req: IncomingMessage, res: ServerResponse) {
+    const userId = req.url.split('/')[2];
+    const user = DataRepository.getUserById(userId);
+    if (!user) {
       sendJsonResponse(res, 404, { message: 'User not found' });
       return;
     }
-    users[userId].hobbies.push(hobby);
-    sendJsonResponse(res, 201, hobby);
-  });
+
+    parseRequestData(req, (data) => {
+      const hobby = JSON.parse(data);
+
+      sendJsonResponse(res, 201, DataRepository.addUserHobby(userId, hobby));
+    });
+  }
+
+  static deleteHobbiesForUser(req: IncomingMessage, res: ServerResponse) {
+    const userId = req.url.split('/')[2];
+    const user = DataRepository.getUserById(userId);
+    if (!user) {
+      sendJsonResponse(res, 404, { message: 'User not found' });
+      return;
+    }
+
+    DataRepository.deleteUserHobby(userId);
+    sendJsonResponse(res, 200, { message: 'Hobbies deleted successfully' });
+  }
 }
 
-export function deleteHobbiesForUser(req: IncomingMessage, res: ServerResponse) {
-  const userId = req.url.split('/')[2];
-  users[userId].hobbies = [];
-  sendJsonResponse(res, 200, { message: 'Hobbies deleted successfully' });
-}

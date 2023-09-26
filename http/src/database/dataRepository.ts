@@ -28,7 +28,9 @@ export class DataRepository {
   }
 
   static getUsers(): User[] {
-    return this.users;
+    return this.users.map(({ name, id, email }: User) => {
+      return { name, id, email }
+    });
   }
 
   static deleteUser(id: string): User {

@@ -17,9 +17,7 @@ export class UserController {
   }
 
   static getAllUsers(req: IncomingMessage, res: ServerResponse) {
-    const responseUsers = DataRepository.getUsers().map(({ name, id, email }: User) => {
-      return { name, id, email }
-    })
+    const responseUsers = DataRepository.getUsers()
     sendJsonResponse(res, 200, responseUsers);
   }
 
